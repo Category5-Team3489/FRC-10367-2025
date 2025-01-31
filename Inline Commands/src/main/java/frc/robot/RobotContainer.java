@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.RollerConstants;
-import frc.robot.commands.Autos;
+// import frc.robot.commands.Autos;
 import frc.robot.subsystems.CANDriveSubsystem;
 import frc.robot.subsystems.CANRollerSubsystem;
 
@@ -48,7 +48,7 @@ public class RobotContainer {
     // Set the options to show up in the Dashboard for selecting auto modes. If you
     // add additional auto modes you can add additional lines here with
     // autoChooser.addOption
-    autoChooser.setDefaultOption("Autonomous", Autos.exampleAuto(driveSubsystem));
+    // autoChooser.setDefaultOption("Autonomous", Autos.exampleAuto(driveSubsystem));
   }
 
   /**
@@ -71,14 +71,17 @@ public class RobotContainer {
     operatorController.a()
         .whileTrue(rollerSubsystem.runRoller(rollerSubsystem, () -> RollerConstants.ROLLER_EJECT_VALUE, () -> 0));
 
+    operatorController.x()
+        .whileTrue(rollerSubsystem.rollerTest(rollerSubsystem));
+
     // Set the default command for the drive subsystem to the command provided by
     // factory with the values provided by the joystick axes on the driver
     // controller. The Y axis of the controller is inverted so that pushing the
     // stick away from you (a negative value) drives the robot forwards (a positive
     // value)
     driveSubsystem.setDefaultCommand(
-        driveSubsystem.driveArcade(
-            driveSubsystem, () -> -driverController.getLeftY(), () -> -driverController.getRightX()));
+        driveSubsystem.tankDrive(
+            driveSubsystem, () -> -driverController.getLeftY(), () -> -driverController.getRightY()));
 
     // Set the default command for the roller subsystem to the command from the
     // factory with the values provided by the triggers on the operator controller
