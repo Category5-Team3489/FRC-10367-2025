@@ -4,21 +4,19 @@
 
 package frc.robot.subsystems;
 
-import java.util.function.DoubleSupplier;
-
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
+
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.DriveConstants;
 
 public class CANDriveSubsystem extends SubsystemBase {
   private final WPI_TalonSRX leftLeader;
@@ -30,11 +28,11 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   public CANDriveSubsystem() {
     // create brushed motors for drive
-    leftLeader = new WPI_TalonSRX(2);
-    leftFollower = new WPI_TalonSRX(1);
-    rightLeader = new WPI_TalonSRX(4);
-    rightFollower = new WPI_TalonSRX(3);
 
+    leftLeader = new Talon(DriveConstants.LEFT_LEADER_ID);
+    leftFollower = new Talon(DriveConstants.LEFT_FOLLOWER_ID);
+    rightLeader = new Talon(DriveConstants.RIGHT_LEADER_ID);
+    rightFollower = new Talon(DriveConstants.RIGHT_FOLLOWER_ID);
     // set up differential drive class
     drive = new DifferentialDrive(leftLeader, rightLeader);
 
@@ -51,9 +49,6 @@ public class CANDriveSubsystem extends SubsystemBase {
     // battery voltages (at the cost of a little bit of top speed on a fully charged
     // battery). The current limit helps prevent tripping
     // breakers.
-    // SparkMaxConfig config = new SparkMaxConfig();
-    // config.voltageCompensation(12);
-    // config.smartCurrentLimit(DriveConstants.DRIVE_MOTOR_CURRENT_LIMIT);
 
     // Set configuration to follow leader and then apply it to corresponding
     // follower. Resetting in case a new controller is swapped
@@ -61,13 +56,24 @@ public class CANDriveSubsystem extends SubsystemBase {
     rightFollower.follow(rightLeader);
     leftFollower.follow(leftLeader);
 
-    // Remove following, then apply config to right leader
-    rightLeader.setInverted(true);
-    leftLeader.setInverted(false);
+    // config.follow(leftLeader);
+    // leftFollower.configure(config, ResetMode.kResetSafeParameters,
+    // PersistMode.kPersistParameters);
+    // config.follow(rightLeader);
+    // rightFollower.configure(config, ResetMode.kResetSafeParameters,
+    // PersistMode.kPersistParameters);
 
+    // Remove following, then apply config to right leader
+    // config.disableFollowerMode();
+    // rightLeader.configure(config, ResetMode.kResetSafeParameters,
+    // PersistMode.kPersistParameters);
     // Set conifg to inverted and then apply to left leader. Set Left side inverted
     // so that postive values drive both sides forward
-  
+    rightLeader.setInverted(true);
+    leftLeader.setInverted(false);
+    // config.inverted(true);
+    // leftLeader.configure(config, ResetMode.kResetSafeParameters,
+    // PersistMode.kPersistParameters);
   }
 
   @Override
@@ -75,9 +81,9 @@ public class CANDriveSubsystem extends SubsystemBase {
   }
 
   // Command to drive the robot with joystick inputs
-  public Command tankDrive(
-      CANDriveSubsystem driveSubsystem, DoubleSupplier leftSpeed, DoubleSupplier rightSpeed) {
+  public Command driveArcade(
+      CANDriveSubsystem driveSubsystem, DoubleSupplier xSpeed, DoubleSupplier zRotation) {
     return Commands.run(
-        () -> drive.tankDrive(leftSpeed.getAsDouble(), rightSpeed.getAsDouble()), driveSubsystem);
+        () -> drive.arcadeDrive(xSpeed.getAsDouble(), zRotation.getAsDouble()), driveSubsystem);
   }
 }
