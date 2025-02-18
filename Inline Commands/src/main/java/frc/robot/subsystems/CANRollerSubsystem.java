@@ -8,11 +8,16 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.RollerConstants;
+
+import java.util.PrimitiveIterator;
 import java.util.function.DoubleSupplier;
 
-
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -20,16 +25,20 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 /** Class to run the rollers over CAN */
 public class CANRollerSubsystem extends SubsystemBase {
   private final SparkMax rollerMotor;
+  private final RelativeEncoder encoder;
+  private final SparkClosedLoopController pidController;
 
   public CANRollerSubsystem() {
     // Set up the roller motor as a brushed motor
     rollerMotor = new SparkMax(RollerConstants.ROLLER_MOTOR_ID, MotorType.kBrushless);
-	
+    encoder = rollerMotor.getEncoder();
+    pidController = rollerMotor.getClosedLoopController();
+
 
     // Set can timeout. Because this project only sets parameters once on
     // construction, the timeout can be long without blocking robot operation. Code
     // which sets or gets parameters during operation may need a shorter timeout.
-    //rollerMotor.setCANTimeout(250);
+    // rollerMotor.setCANTimeout(250);
 
     // Create and apply configuration for roller motor. Voltage compensation helps
     // the roller behave the same as the battery
@@ -38,7 +47,8 @@ public class CANRollerSubsystem extends SubsystemBase {
     // SparkMaxConfig rollerConfig = new SparkMaxConfig();
     // rollerConfig.voltageCompensation(RollerConstants.ROLLER_MOTOR_VOLTAGE_COMP);
     // rollerConfig.smartCurrentLimit(RollerConstants.ROLLER_MOTOR_CURRENT_LIMIT);
-    // rollerMotor.configure(rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    // rollerMotor.configure(rollerConfig, ResetMode.kResetSafeParameters,
+    // PersistMode.kPersistParameters);
   }
 
   @Override
@@ -51,9 +61,43 @@ public class CANRollerSubsystem extends SubsystemBase {
     return Commands.run(
         () -> rollerMotor.set(forward.getAsDouble() - reverse.getAsDouble()), rollerSubsystem);
   }
-public Command rollerTest(CANRollerSubsystem rollerSubsystem) {
-	return Commands.run( () -> rollerMotor.set(.2), rollerSubsystem);
-}
+
+  public Command rollerTest() {
+    return Commands.run(() -> rollerMotor.set(.2), this);
+
+  }
+
+  public Command littleRoller() {
+    return Commands.run(() -> rollerMotor.set(.12), this);
+  }
+
+  public Command swiftness() {
+    return Commands.run(() -> rollerMotor.set(.5), this);
+  }
+
+  public Command rollerReverse() {
+    return Commands.run(() -> rollerMotor.set(-.2), this);
+  }
+
+  // public Command rollerFraction() {
+
+  //   return Commands.runOnce(() -> {
+      
+  //     double newPosition = encoder.getPosition() + 50000000000.0;
+  //     System.out.println(newPosition);
+  //     rollerMotor.set(1);
+  //     encoder.setPosition(newPosition);
+  //   }, this);
+
+  
+  public Command rollerFun() {
+    return Commands.runOnce(() -> {
+      double newPosition = encoder.getPosition() + 50000;
+      pidController.setReference(newPosition, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+
+    });
+
+  }
+
 
 }
-

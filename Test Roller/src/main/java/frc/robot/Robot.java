@@ -4,9 +4,13 @@
 
 package frc.robot;
 
+import com.revrobotics.spark.SparkMax;
+
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.drive.RobotDriveBase.MotorType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.revrobotics.CANSparkMax;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -18,7 +22,8 @@ public class Robot extends TimedRobot {
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
-  private SparkMax rollerMotor = new SparkMax(RollerConstants.ROLLER_MOTOR_ID, MotorType.kBrushless);
+  private CANSparkMax sparkMax = new CANSparkMax(deviceID, MotorType.kBrushless);
+  private final CANSparkMax rollerMotor = new CANSparkMax(RollerConstants.ROLLER_MOTOR_ID, MotorType.kBrushless);
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.

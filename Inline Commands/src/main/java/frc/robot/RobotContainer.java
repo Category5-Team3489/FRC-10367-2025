@@ -6,11 +6,12 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.RollerConstants;
-// import frc.robot.commands.Autos;
+import frc.robot.commands.Autos;
 import frc.robot.subsystems.CANDriveSubsystem;
 import frc.robot.subsystems.CANRollerSubsystem;
 
@@ -24,8 +25,9 @@ import frc.robot.subsystems.CANRollerSubsystem;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+  private final Autos autos = new Autos();
   // The robot's subsystems
-  private final CANDriveSubsystem driveSubsystem = new CANDriveSubsystem();
+  private final CANDriveSubsystem driveSubsystem = CANDriveSubsystem.get();
   private final CANRollerSubsystem rollerSubsystem = new CANRollerSubsystem();
 
   // The driver's controller
@@ -48,7 +50,10 @@ public class RobotContainer {
     // Set the options to show up in the Dashboard for selecting auto modes. If you
     // add additional auto modes you can add additional lines here with
     // autoChooser.addOption
-    // autoChooser.setDefaultOption("Autonomous", Autos.exampleAuto(driveSubsystem));
+    autoChooser.setDefaultOption("Autonomous",autos.autos());
+    // autoChooser.addOption("Cat5 123", autos.autos());
+
+
   }
 
   /**
@@ -68,11 +73,22 @@ public class RobotContainer {
   private void configureBindings() {
     // Set the A button to run the "runRoller" command from the factory with a fixed
     // value ejecting the gamepiece while the button is held
-    operatorController.a()
-        .whileTrue(rollerSubsystem.runRoller(rollerSubsystem, () -> RollerConstants.ROLLER_EJECT_VALUE, () -> 0));
+    operatorController.y()
+        .whileTrue(rollerSubsystem.swiftness());
 
-    operatorController.x()
-        .whileTrue(rollerSubsystem.rollerTest(rollerSubsystem));
+    operatorController.a()
+      .onTrue(rollerSubsystem.rollerFun());
+      
+             
+      operatorController.x()
+        .whileTrue(rollerSubsystem.rollerTest());
+
+    operatorController.b()
+        .whileTrue(rollerSubsystem.rollerReverse());
+    
+    // operatorController.rightBumper()
+    //   .onTrue(driveSubsystem.encoderValue());
+
 
     // Set the default command for the drive subsystem to the command provided by
     // factory with the values provided by the joystick axes on the driver
@@ -80,8 +96,7 @@ public class RobotContainer {
     // stick away from you (a negative value) drives the robot forwards (a positive
     // value)
     driveSubsystem.setDefaultCommand(
-        driveSubsystem.tankDrive(
-            driveSubsystem, () -> -driverController.getLeftY(), () -> -driverController.getRightY()));
+        driveSubsystem.tankDrive(driveSubsystem,() -> -driverController.getLeftY(), () -> -driverController.getRightY()));
 
     // Set the default command for the roller subsystem to the command from the
     // factory with the values provided by the triggers on the operator controller
