@@ -37,4 +37,9 @@ public final class Constants {
     public static final int DRIVER_CONTROLLER_PORT = 0;
     public static final int OPERATOR_CONTROLLER_PORT = 1;
   }
+
+  public static final class algaeActuatorConstants {
+    public static final double Min_Tics = 0;
+    public static final double Max_Tics = 1024;
+  }
 }

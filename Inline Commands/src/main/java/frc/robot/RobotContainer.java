@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.RollerConstants;
 import frc.robot.commands.Autos;
+import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CANDriveSubsystem;
 import frc.robot.subsystems.CANRollerSubsystem;
 
@@ -29,7 +30,7 @@ public class RobotContainer {
   // The robot's subsystems
   private final CANDriveSubsystem driveSubsystem = CANDriveSubsystem.get();
   private final CANRollerSubsystem rollerSubsystem = new CANRollerSubsystem();
-
+  private final AlgaeIntake algaeIntake= AlgaeIntake.get();
   // The driver's controller
   private final CommandXboxController driverController = new CommandXboxController(
       OperatorConstants.DRIVER_CONTROLLER_PORT);
@@ -77,7 +78,7 @@ public class RobotContainer {
         .whileTrue(rollerSubsystem.swiftness());
 
     operatorController.a()
-      .onTrue(rollerSubsystem.rollerFun());
+      .onTrue(algaeIntake.algaeActuator());
       
              
       operatorController.x()
@@ -100,11 +101,13 @@ public class RobotContainer {
 
     // Set the default command for the roller subsystem to the command from the
     // factory with the values provided by the triggers on the operator controller
-    rollerSubsystem.setDefaultCommand(
-        rollerSubsystem.runRoller(
-            rollerSubsystem,
-            () -> operatorController.getRightTriggerAxis(),
-            () -> operatorController.getLeftTriggerAxis()));
+
+
+    operatorController.rightTrigger()
+        .whileTrue(algaeIntake.algaeRoller());
+    
+    operatorController.leftTrigger()
+        .whileTrue(algaeIntake.algaeNegativeRoller());
   }
 
   /**
