@@ -50,7 +50,7 @@ public class CANDriveSubsystem extends SubsystemBase {
   private final DifferentialDrive drive;
   private static final CANDriveSubsystem instance = new CANDriveSubsystem();
 
-  public final static AHRS navX = new AHRS(SPI.Port.kMXP);
+  private final AHRS navx;
 
   // private final DifferentialDriveOdometry m_Odometry;
   // private DifferentialDriveKinematics differentialDriveKinematics;
@@ -62,6 +62,7 @@ public class CANDriveSubsystem extends SubsystemBase {
     leftFollower = new WPI_TalonSRX(1);
     rightLeader = new WPI_TalonSRX(4);
     rightFollower = new WPI_TalonSRX(3);
+    navx = new AHRS(SPI.Port.kMXP);  // SPI connection for NavX
 
     // set up differential drive class
     drive = new DifferentialDrive(leftLeader, rightLeader);
@@ -186,6 +187,14 @@ public class CANDriveSubsystem extends SubsystemBase {
         }, driveSubsystem);
 
   }
+  public double getYaw() {
+    return navx.getYaw();
+}
+
+// Reset the NavX's yaw to zero
+public void resetNavX() {
+    navx.reset();
+}
   // public Command encoderValue() {
   // return Commands.runOnce(() -> {
   // leftFollower.getSelectedSensorPosition();

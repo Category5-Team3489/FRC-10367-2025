@@ -24,10 +24,11 @@ public class AlgaeIntake extends SubsystemBase {
     //TODO find gearRatio
     private final int gearRatio = 1;
     private boolean min = true;
+    
     private AlgaeIntake() {
         // TODO find actual motor IDs
-        algeaIntakeRoller = new SparkMax(0, MotorType.kBrushless);
-        algeaIntakeActuator = new SparkMax(0, MotorType.kBrushless);
+        algeaIntakeRoller = new SparkMax(1, MotorType.kBrushless);
+        algeaIntakeActuator = new SparkMax(2, MotorType.kBrushless);
 
         pidController = algeaIntakeActuator.getClosedLoopController();
     }
