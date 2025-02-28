@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -27,12 +29,18 @@ public class CANRollerSubsystem extends SubsystemBase {
   private final SparkMax rollerMotor;
   private final RelativeEncoder encoder;
   private final SparkClosedLoopController pidController;
-
+  private double targetTics = 500;
+  private int ticsPerRotation = 4096;
+  private final int gearRatio = 1;
+  private static final CANRollerSubsystem instance = new CANRollerSubsystem();
+  
   public CANRollerSubsystem() {
     // Set up the roller motor as a brushed motor
     rollerMotor = new SparkMax(RollerConstants.ROLLER_MOTOR_ID, MotorType.kBrushless);
     encoder = rollerMotor.getEncoder();
     pidController = rollerMotor.getClosedLoopController();
+   
+    
 
 
     // Set can timeout. Because this project only sets parameters once on
@@ -56,14 +64,20 @@ public class CANRollerSubsystem extends SubsystemBase {
   }
 
   // Command to run the roller with joystick inputs
-  public Command runRoller(
-      CANRollerSubsystem rollerSubsystem, DoubleSupplier forward, DoubleSupplier reverse) {
-    return Commands.run(
-        () -> rollerMotor.set(forward.getAsDouble() - reverse.getAsDouble()), rollerSubsystem);
-  }
 
-  public Command rollerTest() {
-    return Commands.run(() -> rollerMotor.set(.2), this);
+
+  public static CANRollerSubsystem get() {
+    return instance;
+}
+
+public Command runRoller(
+  CANRollerSubsystem rollerSubsystem, DoubleSupplier forward, DoubleSupplier reverse) {
+return Commands.run(
+    () -> rollerMotor.set(forward.getAsDouble() - reverse.getAsDouble()), rollerSubsystem);
+}
+ 
+public Command rollerTest() {
+    return Commands.run(() -> rollerMotor.set(.25), this);
 
   }
 
@@ -73,6 +87,7 @@ public class CANRollerSubsystem extends SubsystemBase {
 
   public Command swiftness() {
     return Commands.run(() -> rollerMotor.set(.5), this);
+   
   }
 
   public Command rollerReverse() {
@@ -82,21 +97,32 @@ public class CANRollerSubsystem extends SubsystemBase {
   // public Command rollerFraction() {
 
   //   return Commands.runOnce(() -> {
-      
-  //     double newPosition = encoder.getPosition() + 50000000000.0;
+  //     encoder.setPosition(0);
+  //     double newPosition = encoder.getPosition() + 1000;
   //     System.out.println(newPosition);
-  //     rollerMotor.set(1);
+  //     rollerMotor.set(.3);
   //     encoder.setPosition(newPosition);
-  //   }, this);
+  //   }, this); }
 
+ public Command setTargetTics(double tics) {
+        return Commands.runOnce(() -> {targetTics = MathUtil.clamp(tics, RollerConstants.Roller_Min_Ticks, RollerConstants.Roller_Max_Ticks);
+    },this);
+    }
   
   public Command rollerFun() {
     return Commands.runOnce(() -> {
-      double newPosition = encoder.getPosition() + 50000;
-      pidController.setReference(newPosition, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+      double targetRotation = (targetTics * gearRatio) / ticsPerRotation;
+      System.out.println(targetRotation);
+      pidController.setReference(targetRotation, ControlType.kPosition, ClosedLoopSlot.kSlot1);
 
     });
 
+  }
+
+  public Command rollerUpdate(double newTics) {
+    return Commands.runOnce(() -> { 
+      setTargetTics(newTics);
+    });
   }
 
 

@@ -4,9 +4,11 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
@@ -29,7 +31,7 @@ public class RobotContainer {
   private final Autos autos = new Autos();
   // The robot's subsystems
   private final CANDriveSubsystem driveSubsystem = CANDriveSubsystem.get();
-  private final CANRollerSubsystem rollerSubsystem = new CANRollerSubsystem();
+  private final CANRollerSubsystem rollerSubsystem = CANRollerSubsystem.get();
   private final AlgaeIntake algaeIntake= AlgaeIntake.get();
   // The driver's controller
   private final CommandXboxController driverController = new CommandXboxController(
@@ -41,7 +43,8 @@ public class RobotContainer {
 
   // The autonomous chooser
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
-
+  
+ 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -76,17 +79,14 @@ public class RobotContainer {
     // Set the A button to run the "runRoller" command from the factory with a fixed
     // value ejecting the gamepiece while the button is held
     operatorController.y()
-        .whileTrue(rollerSubsystem.swiftness());
+        .onTrue(rollerSubsystem.rollerUpdate(1000));
 
     operatorController.a()
-      .onTrue(algaeIntake.algaeActuator());
-      
-             
-      operatorController.x()
-        .whileTrue(rollerSubsystem.rollerTest());
-
-    operatorController.b()
-        .whileTrue(rollerSubsystem.rollerReverse());
+       .onTrue(algaeIntake.algaeActuator());
+        
+      operatorController.x().whileTrue(new InstantCommand(() -> rollerSubsystem.rollerTest(), rollerSubsystem));
+    
+      operatorController.b().whileTrue(new InstantCommand(() ->rollerSubsystem.rollerReverse(), rollerSubsystem));
     
     // operatorController.rightBumper()
     //   .onTrue(driveSubsystem.encoderValue());
@@ -103,6 +103,11 @@ public class RobotContainer {
     // Set the default command for the roller subsystem to the command from the
     // factory with the values provided by the triggers on the operator controller
 
+    // rollerSubsystem.setDefaultCommand(
+    //     rollerSubsystem.runRoller(
+    //         rollerSubsystem,
+    //         () -> operatorController.getRightTriggerAxis(),
+    //         () -> operatorController.getLeftTriggerAxis()));
 
     operatorController.rightTrigger()
         .whileTrue(algaeIntake.algaeRoller());
@@ -110,6 +115,7 @@ public class RobotContainer {
     operatorController.leftTrigger()
         .whileTrue(algaeIntake.algaeNegativeRoller());
   }
+
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

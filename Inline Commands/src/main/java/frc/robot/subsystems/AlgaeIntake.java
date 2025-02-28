@@ -21,6 +21,7 @@ public class AlgaeIntake extends SubsystemBase {
     private double targetTics = 0;
     private int ticsPerRotation = 4096;
     private final SparkClosedLoopController pidController;
+
     //TODO find gearRatio
     private final int gearRatio = 1;
     private boolean min = true;
@@ -49,6 +50,8 @@ public class AlgaeIntake extends SubsystemBase {
     public Command setTargetTics(double tics) {
         return Commands.run(() -> targetTics = MathUtil.clamp(tics, algaeActuatorConstants.Max_Tics, algaeActuatorConstants.Min_Tics),this);
     }
+
+
     //TODO check the motor to see if needed to be inverted
     public Command algaeActuator() {
         return Commands.runOnce( () -> {
