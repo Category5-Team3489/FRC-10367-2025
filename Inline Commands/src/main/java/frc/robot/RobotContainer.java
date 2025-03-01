@@ -79,14 +79,19 @@ public class RobotContainer {
     // Set the A button to run the "runRoller" command from the factory with a fixed
     // value ejecting the gamepiece while the button is held
     operatorController.y()
-        .onTrue(rollerSubsystem.rollerUpdate(1000));
+    // .onTrue(rollerSubsystem.rollerUpdate(1000));
+    .onTrue(rollerSubsystem.runRoller(rollerSubsystem, () -> .12, () -> 0).andThen(Commands.waitSeconds(1).andThen(rollerSubsystem.runRoller(rollerSubsystem, () -> 0, () -> 0))));
 
     operatorController.a()
        .onTrue(algaeIntake.algaeActuator());
         
-      operatorController.x().whileTrue(new InstantCommand(() -> rollerSubsystem.rollerTest(), rollerSubsystem));
+    operatorController.x()
+    .whileTrue(rollerSubsystem.runRoller(rollerSubsystem, () -> RollerConstants.ROLLER_EJECT_VALUE, () -> 0));
     
-      operatorController.b().whileTrue(new InstantCommand(() ->rollerSubsystem.rollerReverse(), rollerSubsystem));
+
+    
+    operatorController.b() 
+    .whileTrue(rollerSubsystem.runRoller(rollerSubsystem, () -> -.20, () -> 0));
     
     // operatorController.rightBumper()
     //   .onTrue(driveSubsystem.encoderValue());
@@ -108,6 +113,12 @@ public class RobotContainer {
     //         rollerSubsystem,
     //         () -> operatorController.getRightTriggerAxis(),
     //         () -> operatorController.getLeftTriggerAxis()));
+
+    rollerSubsystem.setDefaultCommand(
+        rollerSubsystem.runRoller(
+            rollerSubsystem,
+            () -> 0,
+            () -> 0));
 
     operatorController.rightTrigger()
         .whileTrue(algaeIntake.algaeRoller());

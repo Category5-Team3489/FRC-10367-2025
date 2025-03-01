@@ -24,6 +24,9 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+
+
+
 /** Class to run the rollers over CAN */
 public class CANRollerSubsystem extends SubsystemBase {
   private final SparkMax rollerMotor;
@@ -33,12 +36,18 @@ public class CANRollerSubsystem extends SubsystemBase {
   private int ticsPerRotation = 4096;
   private final int gearRatio = 1;
   private static final CANRollerSubsystem instance = new CANRollerSubsystem();
-  
+  private double forward = .25;
+
+
+  // private CANSparkMax backUpMotor;
   public CANRollerSubsystem() {
     // Set up the roller motor as a brushed motor
     rollerMotor = new SparkMax(RollerConstants.ROLLER_MOTOR_ID, MotorType.kBrushless);
     encoder = rollerMotor.getEncoder();
     pidController = rollerMotor.getClosedLoopController();
+    
+   
+
    
     
 
@@ -75,11 +84,15 @@ public Command runRoller(
 return Commands.run(
     () -> rollerMotor.set(forward.getAsDouble() - reverse.getAsDouble()), rollerSubsystem);
 }
- 
 public Command rollerTest() {
-    return Commands.run(() -> rollerMotor.set(.25), this);
+  System.out.println("rollerTest command triggered"); 
+  return Commands.run(() -> {
+    System.out.println("rollertest should run"); 
+    rollerMotor.set(forward);
+      System.out.println("Motor is running at 0.25"); 
+  });
+}
 
-  }
 
   public Command littleRoller() {
     return Commands.run(() -> rollerMotor.set(.12), this);
@@ -113,17 +126,15 @@ public Command rollerTest() {
     return Commands.runOnce(() -> {
       double targetRotation = (targetTics * gearRatio) / ticsPerRotation;
       System.out.println(targetRotation);
-      pidController.setReference(targetRotation, ControlType.kPosition, ClosedLoopSlot.kSlot1);
+      pidController.setReference(targetRotation, ControlType.kPosition, ClosedLoopSlot.kSlot1, 12);
+      encoder.setPosition(1);
+      // rollerMotor.
 
     });
-
   }
 
   public Command rollerUpdate(double newTics) {
-    return Commands.runOnce(() -> { 
-      setTargetTics(newTics);
-    });
+    targetTics = MathUtil.clamp(newTics, RollerConstants.Roller_Min_Ticks, RollerConstants.Roller_Max_Ticks);
+    return rollerFun();
   }
-
-
 }
