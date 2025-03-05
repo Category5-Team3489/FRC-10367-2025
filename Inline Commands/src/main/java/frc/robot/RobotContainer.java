@@ -54,7 +54,16 @@ public class RobotContainer {
     // Set the options to show up in the Dashboard for selecting auto modes. If you
     // add additional auto modes you can add additional lines here with
     // autoChooser.addOption
-    autoChooser.setDefaultOption("Autonomous",autos.justLeave());
+    // autoChooser.setDefaultOption("Autonomous",autos.justLeave());
+    autoChooser.setDefaultOption("Autonomous",Autos.scoreLoneOnce(driveSubsystem));
+
+    // autoChooser.setDefaultOption("Autonomous", Commands.parallel(
+    //   Commands.runOnce(() -> driveSubsystem.move(.5588,.5588), driveSubsystem), 
+    //   Commands.waitSeconds(1))
+    //   .andThen(
+    //     Commands.runOnce(() -> driveSubsystem.move(0.0,0.0), driveSubsystem)
+    //   ));
+
     // autoChooser.addOption("Turn Left",autos.justLeave());
     // autoChooser.addOption("Cat5 123", autos.autos());
 
@@ -79,8 +88,8 @@ public class RobotContainer {
     // Set the A button to run the "runRoller" command from the factory with a fixed
     // value ejecting the gamepiece while the button is held
     operatorController.y()
-    // .onTrue(rollerSubsystem.rollerUpdate(1000));
-    .onTrue(rollerSubsystem.runRoller(rollerSubsystem, () -> .12, () -> 0).andThen(Commands.waitSeconds(1).andThen(rollerSubsystem.runRoller(rollerSubsystem, () -> 0, () -> 0))));
+    .onTrue(rollerSubsystem.rollerUpdate(1000));
+    // .onTrue(rollerSubsystem.runRoller(rollerSubsystem, () -> .12, () -> 0).andThen(Commands.waitSeconds(1).andThen(rollerSubsystem.runRoller(rollerSubsystem, () -> 0, () -> 0))));
 
     operatorController.a()
        .onTrue(algaeIntake.algaeActuator());

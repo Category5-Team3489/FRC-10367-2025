@@ -31,7 +31,7 @@ public final class Constants {
     public static final int ROLLER_MOTOR_CURRENT_LIMIT = 60;
     public static final double ROLLER_MOTOR_VOLTAGE_COMP = 10;
     public static final double Roller_Min_Ticks = 0;
-    public static final double Roller_Max_Ticks = 750;
+    public static final double Roller_Max_Ticks = 1000;
     public static final double ROLLER_EJECT_VALUE = 0.25;
 
   }

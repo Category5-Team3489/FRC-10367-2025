@@ -95,7 +95,7 @@ public Command rollerTest() {
 
 
   public Command littleRoller() {
-    return Commands.run(() -> rollerMotor.set(.12), this);
+    return Commands.run(() -> rollerMotor.set(.12),this);
   }
 
   public Command swiftness() {
