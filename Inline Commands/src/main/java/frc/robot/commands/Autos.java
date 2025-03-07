@@ -46,13 +46,14 @@ public final class Autos {
     return driveSubsystem.tankDrive(driveSubsystem, () -> speed, () -> speed).withTimeout(2);
   }
 
-  public static final Command scoreLoneOnce(CANDriveSubsystem driveSubsystem) {
+  public static final Command scoreLoneOnce(CANDriveSubsystem driveSubsystem, double distance) {
     System.out.println("Score L1 ONCE");
     // return Commands.parallel(
     //     driveSubsystem.tankDrive(driveSubsystem, () -> speed, () -> speed),
     //     Commands.waitSeconds(1.832/speed))
-        return driveSubsystem.tankDrive(driveSubsystem, () -> speed, () -> speed).withTimeout(1.832/speed)
-        .andThen(rollerSubsystem.runRoller(rollerSubsystem, () -> .25, () -> 0).withTimeout(3));
+    //    
+    return driveSubsystem.tankDrive(driveSubsystem, () -> speed, () -> speed).withTimeout(distance/speed)
+        .andThen(rollerSubsystem.runRollerOnce(rollerSubsystem, () -> .25, () -> 0).andThen(Commands.waitSeconds(1).andThen(rollerSubsystem.runRollerOnce(rollerSubsystem, () -> .25, () -> .25))));
   }
 }
 // public final class Autos {

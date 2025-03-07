@@ -4,6 +4,13 @@
 
 package frc.robot;
 
+import java.util.Optional;
+import java.util.OptionalInt;
+
+import javax.xml.transform.sax.TemplatesHandler;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -51,11 +58,27 @@ public class RobotContainer {
   public RobotContainer() {
     configureBindings();
 
+    // Optional<Alliance> alliance = DriverStation.getAlliance();
+    OptionalInt location = DriverStation.getLocation();
+
+    // if (alliance.isPresent() && alliance.get() == Alliance.Red) {
+
+    // } else { //Blue
+
+    // }
+
+    if (location.isPresent() && location.getAsInt() == 2) {
+      autoChooser.setDefaultOption("Autonomous",Autos.scoreLoneOnce(driveSubsystem, 2.234));
+    } else {
+      autoChooser.setDefaultOption("Autonomous",Autos.scoreLoneOnce(driveSubsystem, 3.651));
+    }
+
+    
+
     // Set the options to show up in the Dashboard for selecting auto modes. If you
     // add additional auto modes you can add additional lines here with
     // autoChooser.addOption
     // autoChooser.setDefaultOption("Autonomous",autos.justLeave());
-    autoChooser.setDefaultOption("Autonomous",Autos.scoreLoneOnce(driveSubsystem));
 
     // autoChooser.setDefaultOption("Autonomous", Commands.parallel(
     //   Commands.runOnce(() -> driveSubsystem.move(.5588,.5588), driveSubsystem), 
@@ -88,8 +111,8 @@ public class RobotContainer {
     // Set the A button to run the "runRoller" command from the factory with a fixed
     // value ejecting the gamepiece while the button is held
     operatorController.y()
-    .onTrue(rollerSubsystem.rollerUpdate(1000));
-    // .onTrue(rollerSubsystem.runRoller(rollerSubsystem, () -> .12, () -> 0).andThen(Commands.waitSeconds(1).andThen(rollerSubsystem.runRoller(rollerSubsystem, () -> 0, () -> 0))));
+    // .onTrue(rollerSubsystem.rollerUpdate(1000));
+    .onTrue(rollerSubsystem.runRollerOnce(rollerSubsystem, () -> .12, () -> 0).andThen(Commands.waitSeconds(1).andThen(rollerSubsystem.runRollerOnce(rollerSubsystem, () -> .12, () -> .12))));
 
     operatorController.a()
        .onTrue(algaeIntake.algaeActuator());

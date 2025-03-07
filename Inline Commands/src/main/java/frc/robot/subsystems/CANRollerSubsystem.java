@@ -84,6 +84,13 @@ public Command runRoller(
 return Commands.run(
     () -> rollerMotor.set(forward.getAsDouble() - reverse.getAsDouble()), rollerSubsystem);
 }
+
+public Command runRollerOnce(
+  CANRollerSubsystem rollerSubsystem, DoubleSupplier forward, DoubleSupplier reverse) {
+return Commands.runOnce(
+    () -> rollerMotor.set(forward.getAsDouble() - reverse.getAsDouble()), rollerSubsystem);
+}
+
 public Command rollerTest() {
   System.out.println("rollerTest command triggered"); 
   return Commands.run(() -> {
