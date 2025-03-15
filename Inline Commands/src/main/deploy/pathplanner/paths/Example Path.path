@@ -1,0 +1,61 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.5599471997802752,
+        "y": 5.492382339971527
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.5599471997802756,
+        "y": 5.492382339971527
+      },
+      "isLocked": false,
+      "linkedName": "Source Speaker Set Up"
+    },
+    {
+      "anchor": {
+        "x": 4.0777770571233,
+        "y": 5.492382339971527
+      },
+      "prevControl": {
+        "x": 3.0777770571233,
+        "y": 5.492382339971527
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "reversed": false,
+<<<<<<< Updated upstream:Crescendo/src/main/deploy/pathplanner/paths/Example Path.path
+  "folder": null,
+  "previewStartingState": {
+    "rotation": 2.009553813021123,
+    "velocity": 0
+=======
+  "folder": "2024 Path Cresendo",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+>>>>>>> Stashed changes:Crescendo/src/main/deploy/pathplanner/paths/super.path
+  },
+  "useDefaultConstraints": true
+}

@@ -5,7 +5,9 @@
 package frc.robot.subsystems;
 
 import java.beans.Encoder;
+import java.io.IOException;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import javax.naming.NameNotFoundException;
 
@@ -27,10 +29,12 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.proto.Kinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -40,6 +44,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
+import org.json.simple.parser.ParseException;
 
 public class CANDriveSubsystem extends SubsystemBase {
   private final WPI_TalonSRX leftLeader;
@@ -52,8 +57,8 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   private final AHRS navx;
 
-  // private final DifferentialDriveOdometry m_Odometry;
-  // private DifferentialDriveKinematics differentialDriveKinematics;
+  private final DifferentialDriveOdometry m_Odometry;
+  private DifferentialDriveKinematics differentialDriveKinematics;
   // private DifferentialDriveWheelPositions encoders;
 
   private CANDriveSubsystem() {
@@ -67,12 +72,12 @@ public class CANDriveSubsystem extends SubsystemBase {
     // set up differential drive class
     drive = new DifferentialDrive(leftLeader, rightLeader);
 
-    // differentialDriveKinematics = new DifferentialDriveKinematics(0.251);
+    differentialDriveKinematics = new DifferentialDriveKinematics(0.251);
 
     // encoders = new DifferentialDriveWheelPositions(null, null);
 
-    // m_Odometry = new
-    // DifferentialDriveOdometry(navX.getRotation2d(),null,null,getPose());
+    m_Odometry = new DifferentialDriveOdometry(navx.getRotation2d(), leftLeader.getSelectedSensorPosition(),
+        rightLeader.getSelectedSensorPosition());
     // Set can timeout. Because this project only sets parameters once on
     // construction, the timeout can be long without blocking robot operation. Code
     // which sets or gets parameters during operation may need a shorter timeout.
@@ -116,42 +121,48 @@ public class CANDriveSubsystem extends SubsystemBase {
     // Load the RobotConfig from the GUI settings. You should probably
     // store this in your Constants file
 
-    // RobotConfig config;
-    // try{
-    // config = RobotConfig.fromGUISettings();
-    // } catch (Exception e) {
-    // // Handle exception as needed
-    // e.printStackTrace();
-    // return;
-    // }
+    RobotConfig config;
+    try {
+      config = RobotConfig.fromGUISettings();
+    } 
+    catch (ParseException pe) {
+
+      pe.printStackTrace();
+      return;
+    }
+    catch(IOException ioe) {
+      ioe.printStackTrace();
+      return;
+    }
+
 
     // // Configure AutoBuilder last
-    // AutoBuilder.configure(
-    // this::getPose, // Robot pose supplier
-    // this::resetPose, // Method to reset odometry (will be called if your auto has
-    // a starting pose)
-    // this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT
-    // RELATIVE
-    // (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will
-    // drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs
-    // individual module feedforwards
-    // new PPLTVController(0.02), // PPLTVController is the built in path following
-    // controller for differential drive trains
-    // config, // The robot configuration
-    // () -> {
-    // // Boolean supplier that controls when the path will be mirrored for the red
-    // alliance
-    // // This will flip the path being followed to the red side of the field.
-    // // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+    AutoBuilder.configure(
+        this::getPose, // Robot pose supplier
+        this::resetPose, // Method to reset odometry (will be called if your auto has
+        // a starting pose)
+        this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT
+        // RELATIVE
+        (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will
+        // drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs
+        // individual module feedforwards
+        new PPLTVController(0.02), // PPLTVController is the built in path following
+        // controller for differential drive trains
+        config, // The robot configuration
+        () -> {
+          // Boolean supplier that controls when the path will be mirrored for the red
+          // alliance
+          // This will flip the path being followed to the red side of the field.
+          // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
-    // var alliance = DriverStation.getAlliance();
-    // if (alliance.isPresent()) {
-    // return alliance.get() == DriverStation.Alliance.Red;
-    // }
-    // return false;
-    // },
-    // this // Reference to this subsystem to set requirements
-    // );
+          var alliance = DriverStation.getAlliance();
+          if (alliance.isPresent()) {
+            return alliance.get() == DriverStation.Alliance.Red;
+          }
+          return false;
+        },
+        this // Reference to this subsystem to set requirements
+    );
 
     // private Pose2d getPose() {
     // return new Pose2d(new Translation2d(), navX.getRotation2d());
@@ -169,8 +180,38 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   }
 
+  // region PathPlanner methods
+  private Pose2d getPose() {
+    return m_Odometry.getPoseMeters();
+  }
+
+  private void resetPose(Pose2d pose) {
+    leftFollower.setSelectedSensorPosition(0.0);
+    rightFollower.setSelectedSensorPosition(0.0);
+  }
+
+  private ChassisSpeeds getRobotRelativeSpeeds() {
+    return differentialDriveKinematics.toChassisSpeeds(new DifferentialDriveWheelSpeeds(
+        leftLeader.getSelectedSensorVelocity(), rightLeader.getSelectedSensorVelocity()));
+  }
+
+  private void driveRobotRelative(ChassisSpeeds chassisSpeeds) {
+
+    final double robotLength = 38.5; // With Bumbers
+    final double leftMotorSpeed = chassisSpeeds.vxMetersPerSecond
+        - chassisSpeeds.omegaRadiansPerSecond * robotLength / 2;
+    final double rightMotorSpeed = chassisSpeeds.vxMetersPerSecond
+        + chassisSpeeds.omegaRadiansPerSecond * robotLength / 2;
+
+    drive.tankDrive(leftMotorSpeed, rightMotorSpeed);
+  }
+  // endregion
+
   @Override
   public void periodic() {
+    // For Autos
+    m_Odometry.update(navx.getRotation2d(), leftFollower.getSelectedSensorPosition(),
+        rightFollower.getSelectedSensorPosition());
   }
 
   public static CANDriveSubsystem get() {

@@ -9,10 +9,14 @@ import java.util.OptionalInt;
 
 import javax.xml.transform.sax.TemplatesHandler;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -49,7 +53,8 @@ public class RobotContainer {
       OperatorConstants.OPERATOR_CONTROLLER_PORT);
 
   // The autonomous chooser
-  private final SendableChooser<Command> autoChooser = new SendableChooser<>();
+  // private final SendableChooser<Command> autoChooser = new SendableChooser<>();
+  private final SendableChooser<Command> autoChooser;
   
  
   /**
@@ -66,12 +71,19 @@ public class RobotContainer {
     // } else { //Blue
 
     // }
+    autoChooser = AutoBuilder.buildAutoChooser();
+    // autoChooser = AutoBuilder.buildAutoChooserWithOptionsModifier((stream) -> stream);
 
-    if (location.isPresent() && location.getAsInt() == 2) {
-      autoChooser.setDefaultOption("Autonomous",Autos.scoreLoneOnce(driveSubsystem, 2.234));
-    } else {
-      autoChooser.setDefaultOption("Autonomous",Autos.scoreLoneOnce(driveSubsystem, 3.651));
-    }
+    // if (location.isPresent() && location.getAsInt() == 2) {
+    //   autoChooser.setDefaultOption("Autonomous",Autos.scoreLoneOnce(driveSubsystem, 2.234));
+    // } else {
+    //   autoChooser.setDefaultOption("Autonomous",Autos.scoreLoneOnce(driveSubsystem, 3.651));
+    // }
+
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+
+    // Shuffleboard.getTab("Auto").add("Auto Selector", autoChooser)
+    // .withSize(5, 5);
 
     
 
