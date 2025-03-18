@@ -11,20 +11,14 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.RollerConstants;
 
-import java.util.PrimitiveIterator;
 import java.util.function.DoubleSupplier;
 
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
-
-
 
 
 /** Class to run the rollers over CAN */
@@ -32,7 +26,7 @@ public class CANRollerSubsystem extends SubsystemBase {
   private final SparkMax rollerMotor;
   private final RelativeEncoder encoder;
   private final SparkClosedLoopController pidController;
-  private double targetTics = 500;
+  private double targetTics = 0;
   private int ticsPerRotation = 4096;
   private final int gearRatio = 1;
   private static final CANRollerSubsystem instance = new CANRollerSubsystem();
@@ -124,10 +118,9 @@ public Command rollerTest() {
   //     encoder.setPosition(newPosition);
   //   }, this); }
 
- public Command setTargetTics(double tics) {
-        return Commands.runOnce(() -> {targetTics = MathUtil.clamp(tics, RollerConstants.Roller_Min_Ticks, RollerConstants.Roller_Max_Ticks);
-    },this);
-    }
+ public void setTargetTics(double tics) {
+        targetTics = MathUtil.clamp(tics, RollerConstants.Roller_Min_Ticks, RollerConstants.Roller_Max_Ticks);
+    };
   
   public Command rollerFun() {
     return Commands.runOnce(() -> {
@@ -140,8 +133,7 @@ public Command rollerTest() {
     });
   }
 
-  public Command rollerUpdate(double newTics) {
-    targetTics = MathUtil.clamp(newTics, RollerConstants.Roller_Min_Ticks, RollerConstants.Roller_Max_Ticks);
-    return rollerFun();
-  }
+  // public void rollerUpdate(double newTics) {
+  //   targetTics = MathUtil.clamp(newTics, RollerConstants.Roller_Min_Ticks, RollerConstants.Roller_Max_Ticks);
+  // }
 }
