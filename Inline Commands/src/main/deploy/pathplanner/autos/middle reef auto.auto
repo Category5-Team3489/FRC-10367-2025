@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Reef Start Barge1"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Diagonal From Barge2"
+            "pathName": "middle to reef"
           }
         },
         {
@@ -134,6 +128,6 @@
     }
   },
   "resetOdom": false,
-  "folder": "2025 Path Reefscape",
+  "folder": null,
   "choreoAuto": false
 }

@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.8696302816901404,
-        "y": 4.067517605633801
+        "x": 4.480721830985915,
+        "y": 1.4455985915492944
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.798767605633803,
-        "y": 3.4722711267605613
+        "x": 3.4602992957746475,
+        "y": 1.7432218309859189
       },
       "isLocked": false,
-      "linkedName": "middle to reef"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.5383196721311485,
-        "y": 1.046055327868852
+        "x": 1.5186619718309844,
+        "y": 0.5527288732394345
       },
       "prevControl": {
-        "x": 6.868954918032787,
-        "y": 0.938165983606558
+        "x": 1.6745021357654106,
+        "y": 0.8164583814361559
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,7 +47,7 @@
   "reversed": false,
   "folder": "2025 reefscape",
   "idealStartingState": {
-    "velocity": 0,
+    "velocity": 0.3,
     "rotation": 0.0
   },
   "useDefaultConstraints": false
