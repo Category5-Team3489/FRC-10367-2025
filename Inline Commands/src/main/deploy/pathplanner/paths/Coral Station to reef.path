@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.707482394366196,
-        "y": 6.8595070422535205
+        "x": 1.2631244707874683,
+        "y": 1.0752328535139701
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.6728873239436615,
-        "y": 6.476848591549294
+        "x": 1.515749364944962,
+        "y": 1.3278577476714644
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.0550804403048264,
-        "y": 7.049068585944115
+        "x": 3.75965283657917,
+        "y": 2.9773497036409817
       },
       "prevControl": {
-        "x": 1.1739627434377646,
-        "y": 6.647840812870448
+        "x": 3.417866215071973,
+        "y": 2.427519051651143
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 9.0,
+    "maxAcceleration": 4.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -44,11 +44,11 @@
     "velocity": 0,
     "rotation": 0.0
   },
-  "reversed": true,
+  "reversed": false,
   "folder": "2025 reefscape",
   "idealStartingState": {
-    "velocity": 0,
+    "velocity": 0.3,
     "rotation": 0.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

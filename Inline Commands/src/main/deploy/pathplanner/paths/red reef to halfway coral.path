@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.40193661971831,
-        "y": 2.8345070422535197
+        "x": 5.349703640982218,
+        "y": 2.917908552074513
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.612296208759405,
-        "y": 2.5940960833494104
+        "x": 5.560063230023314,
+        "y": 2.6774975931704037
       },
       "isLocked": false,
       "linkedName": null
@@ -44,7 +44,7 @@
     "velocity": 0,
     "rotation": 0.0
   },
-  "reversed": false,
+  "reversed": true,
   "folder": "2025 reefscape",
   "idealStartingState": {
     "velocity": 0,

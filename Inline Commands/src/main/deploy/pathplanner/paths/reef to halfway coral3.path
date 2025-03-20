@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.798767605633803,
-        "y": 3.4722711267605613
+        "x": 6.999195596951735,
+        "y": 4.255334462320067
       },
       "isLocked": false,
       "linkedName": "middle to reef"
@@ -44,7 +44,7 @@
     "velocity": 0,
     "rotation": 0.0
   },
-  "reversed": false,
+  "reversed": true,
   "folder": "2025 reefscape",
   "idealStartingState": {
     "velocity": 0,
