@@ -43,6 +43,6 @@ public final class Constants {
 
   public static final class algaeActuatorConstants {
     public static final double Min_Tics = 0;
-    public static final double Max_Tics = 1000;
+    public static final double Max_Tics = 75;
   }
 }

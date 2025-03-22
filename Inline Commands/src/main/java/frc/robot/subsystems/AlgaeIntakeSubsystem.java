@@ -18,7 +18,7 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
     private final SparkMax algeaIntakeRoller;
     private final SparkMax algeaIntakeActuator;
     private static final AlgaeIntakeSubsystem instance = new AlgaeIntakeSubsystem();
-    private double targetTics = 0;
+    public double targetTics = 0;
     private int ticsPerRotation = 4096;
     private final SparkClosedLoopController pidController;
 
@@ -28,8 +28,8 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
 
     private AlgaeIntakeSubsystem() {
         // TODO find actual motor IDs
-        algeaIntakeRoller = new SparkMax(1, MotorType.kBrushless);
-        algeaIntakeActuator = new SparkMax(2, MotorType.kBrushless);
+        algeaIntakeRoller = new SparkMax(11, MotorType.kBrushless);
+        algeaIntakeActuator = new SparkMax(4, MotorType.kBrushless);
 
         pidController = algeaIntakeActuator.getClosedLoopController();
     }
@@ -47,25 +47,26 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
     // TODO ajust the tic values
     public void setTargetTics(double tics) {
         targetTics = MathUtil.clamp(tics, algaeActuatorConstants.Max_Tics, algaeActuatorConstants.Min_Tics);
+    
     }
+@Override
+public void periodic() {
+    setAngle();
+    System.out.println(targetTics);
+
+}
+
 
     // TODO check the motor to see if needed to be inverted
-    public Command algaeActuator(double tics) {
-        return Commands.runOnce(() -> {
-            if (min) {
-                setTargetTics(algaeActuatorConstants.Max_Tics);
-            } else {
-                setTargetTics(algaeActuatorConstants.Min_Tics);
-            }
-            setAngle();
-            min = !min;
-        });
-    }
+    public Command algaeActuator(double target) {
+        return Commands.runOnce(() -> 
+        setTargetTics(target));}
+    
 
     // TODO find gearRatio
     private void setAngle() {
-        double targetRotation = (targetTics * gearRatio) / ticsPerRotation;
-        pidController.setReference(targetRotation, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        setTargetTics(targetTics);
+        pidController.setReference(targetTics, ControlType.kPosition, ClosedLoopSlot.kSlot0);
     }
 
     // public Command algaeActuator() {

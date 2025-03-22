@@ -15,14 +15,17 @@ import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.RollerConstants;
+import frc.robot.Constants.algaeActuatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.AlgaeIntakeSubsystem;
 import frc.robot.subsystems.CANDriveSubsystem;
@@ -60,7 +63,7 @@ public class RobotContainer {
    */
   public RobotContainer() {
     configureBindings();
-    // configureCamera();
+    configureCamera();
 
     // Optional<Alliance> alliance = DriverStation.getAlliance();
     OptionalInt location = DriverStation.getLocation();
@@ -74,13 +77,13 @@ public class RobotContainer {
     // autoChooser = AutoBuilder.buildAutoChooserWithOptionsModifier((stream) ->
     // stream);
 
-    // if (location.isPresent() && location.getAsInt() == 2) {
-    // autoChooser.setDefaultOption("Autonomous",Autos.scoreLoneOnce(driveSubsystem,
-    // 2.234));
-    // } else {
-    // autoChooser.setDefaultOption("Autonomous",Autos.scoreLoneOnce(driveSubsystem,
-    // 3.651));
-    // }
+    if (location.isPresent() && location.getAsInt() == 2) {
+    autoChooser.setDefaultOption("Autonomous",Autos.scoreLoneOnce(driveSubsystem,
+    2.234));
+    } else {
+    autoChooser.setDefaultOption("Autonomous",Autos.scoreLoneOnce(driveSubsystem,
+    3.651));
+    }
 
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
@@ -127,7 +130,12 @@ public class RobotContainer {
             Commands.waitSeconds(.5).andThen(rollerSubsystem.runRollerOnce(rollerSubsystem, () -> .12, () -> .12))));
 
     operatorController.a()
-        .onTrue(algaeIntakeSubsystem.algaeActuator(1000.0));
+        .onTrue(Commands.runOnce(()-> {
+          if (algaeIntakeSubsystem.targetTics == algaeActuatorConstants.Max_Tics) {
+            algaeIntakeSubsystem.algaeActuator(algaeActuatorConstants.Min_Tics);
+          }else {algaeIntakeSubsystem.algaeActuator(algaeActuatorConstants.Max_Tics);}
+        }));
+        
 
     operatorController.x()
         .whileTrue(rollerSubsystem.runRoller(rollerSubsystem, () -> RollerConstants.ROLLER_EJECT_VALUE, () -> 0));
@@ -143,6 +151,10 @@ public class RobotContainer {
     // controller. The Y axis of the controller is inverted so that pushing the
     // stick away from you (a negative value) drives the robot forwards (a positive
     // value)
+    // algaeIntakeSubsystem.setDefaultCommand(
+    //   algaeIntakeSubsystem.algaeActuator(0)
+    // );
+    
     driveSubsystem.setDefaultCommand(
         driveSubsystem.tankDrive(driveSubsystem, () -> -driverController.getLeftY(),
             () -> -driverController.getRightY()));
@@ -165,20 +177,22 @@ public class RobotContainer {
     algaeIntakeSubsystem.setDefaultCommand(
         algaeIntakeSubsystem.algaeRoller(
             algaeIntakeSubsystem,
-            () -> operatorController.getRightTriggerAxis(),
-            () -> operatorController.getLeftTriggerAxis()));
+            () -> operatorController.getLeftTriggerAxis(),
+            () -> operatorController.getRightTriggerAxis()));
   }
-//  private void configureCamera(){
-//     UsbCamera camera = CameraServer.startAutomaticCapture();
-//     camera.setResolution(320, 240); // Adjust resolution as needed
-//     CvSink cvSink = CameraServer.getVideo();
+ private void configureCamera(){
+    if(!RobotBase.isSimulation()){UsbCamera camera = CameraServer.startAutomaticCapture();
+    camera.setResolution(320, 240); }// Adjust resolution as needed
+
+    
 //     CvSource outputStream = CameraServer.putVideo("Camera Feed", 320, 240);
 //     Mat source = new Mat();
 //     while (!Thread.interrupted()) {
 //         cvSink.grabFrame(source);
 //         outputStream.putFrame(source);
 //     }
-//  }
+
+ }
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
