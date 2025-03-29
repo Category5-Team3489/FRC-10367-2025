@@ -131,10 +131,17 @@ public class RobotContainer {
 
     operatorController.a()
         .onTrue(Commands.runOnce(()-> {
-          if (algaeIntakeSubsystem.targetTics == algaeActuatorConstants.Max_Tics) {
-            algaeIntakeSubsystem.algaeActuator(algaeActuatorConstants.Min_Tics);
-          }else {algaeIntakeSubsystem.algaeActuator(algaeActuatorConstants.Max_Tics);}
+          if (algaeIntakeSubsystem.targetTics == algaeActuatorConstants.Min_Tics) {
+            algaeIntakeSubsystem.algaeActuator(algaeActuatorConstants.Max_Tics);
+          }else {algaeIntakeSubsystem.algaeActuator(algaeActuatorConstants.Min_Tics);}
         }));
+
+    operatorController.leftBumper()
+        .onTrue(algaeIntakeSubsystem.algaeActuator(algaeActuatorConstants.Max_Tics));
+
+     operatorController.rightBumper()
+      .onTrue(algaeIntakeSubsystem.algaeActuator(algaeActuatorConstants.Min_Tics));
+
         
 
     operatorController.x()

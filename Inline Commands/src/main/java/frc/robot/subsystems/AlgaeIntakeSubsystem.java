@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.lang.annotation.Target;
 import java.util.function.DoubleSupplier;
 
 import com.revrobotics.spark.SparkMax;
@@ -30,6 +31,7 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
         // TODO find actual motor IDs
         algeaIntakeRoller = new SparkMax(11, MotorType.kBrushless);
         algeaIntakeActuator = new SparkMax(4, MotorType.kBrushless);
+        algeaIntakeActuator.getEncoder().setPosition(0);
 
         pidController = algeaIntakeActuator.getClosedLoopController();
     }
@@ -51,7 +53,9 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
     }
 @Override
 public void periodic() {
-    setAngle();
+    
+    // System.out.println(targetTics);
+    System.out.println(algeaIntakeActuator.getEncoder().getPosition());
     System.out.println(targetTics);
 
 }
@@ -59,8 +63,10 @@ public void periodic() {
 
     // TODO check the motor to see if needed to be inverted
     public Command algaeActuator(double target) {
-        return Commands.runOnce(() -> 
-        setTargetTics(target));}
+        return Commands.runOnce(() ->{
+        setTargetTics(target);
+        pidController.setReference(targetTics, ControlType.kPosition, ClosedLoopSlot.kSlot0);});
+    }
     
 
     // TODO find gearRatio
