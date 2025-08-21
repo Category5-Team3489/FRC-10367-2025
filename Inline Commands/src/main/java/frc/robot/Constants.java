@@ -24,6 +24,9 @@ public final class Constants {
     public static final int RIGHT_FOLLOWER_ID = 4;
 
     public static final int DRIVE_MOTOR_CURRENT_LIMIT = 60;
+
+    public static final double kMaxSpeed = 5.2;
+
   }
 
   public static final class RollerConstants {

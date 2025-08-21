@@ -14,7 +14,11 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPLTVController;
 
+import choreo.trajectory.DifferentialSample;
+import edu.wpi.first.math.controller.LTVUnicycleController;
+import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
@@ -25,6 +29,8 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.DriveConstants;
+
 import org.json.simple.parser.ParseException;
 
 public class CANDriveSubsystem extends SubsystemBase {
@@ -41,6 +47,15 @@ public class CANDriveSubsystem extends SubsystemBase {
   private final DifferentialDriveOdometry m_Odometry;
   private DifferentialDriveKinematics differentialDriveKinematics;
   // private DifferentialDriveWheelPositions encoders;
+
+
+  
+  // Choreo
+  private final LTVUnicycleController controller = new LTVUnicycleController(0.02, DriveConstants.kMaxSpeed);
+  // private final DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(
+  //     DriveConstants.kTrackWidthMeters);
+  // private final double kS = DriveConstants.kMotorKs;
+  // private final double kV = DriveConstants.kMotorKv;
 
   private CANDriveSubsystem() {
     // create brushed motors for drive
@@ -162,11 +177,11 @@ public class CANDriveSubsystem extends SubsystemBase {
   }
 
   // region PathPlanner methods
-  private Pose2d getPose() {
+  public Pose2d getPose() {
     return m_Odometry.getPoseMeters();
   }
 
-  private void resetPose(Pose2d pose) {
+  public void resetPose(Pose2d pose) {
     leftFollower.setSelectedSensorPosition(0.0);
     rightFollower.setSelectedSensorPosition(0.0);
   }
@@ -227,5 +242,26 @@ public class CANDriveSubsystem extends SubsystemBase {
   // leftFollower.getSelectedSensorPosition();
   // System.out.println(leftFollower.getSelectedSensorPosition());
   // });
+
+
+
+  //Choreo
+  public void followTrajectory(DifferentialSample sample) {
+
+    Pose2d pose = getPose();
+
+    ChassisSpeeds ff = sample.getChassisSpeeds();
+
+    ChassisSpeeds speeds = controller.calculate(
+        pose,
+        sample.getPose(),
+        ff.vxMetersPerSecond,
+        ff.omegaRadiansPerSecond);
+
+    DifferentialDriveWheelSpeeds wheelSpeeds = differentialDriveKinematics.toWheelSpeeds(speeds);
+
+    drive.tankDrive(wheelSpeeds.leftMetersPerSecond,wheelSpeeds.rightMetersPerSecond);
+
+  }
 
 }

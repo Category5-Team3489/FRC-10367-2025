@@ -11,6 +11,8 @@ import org.opencv.core.Mat;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
+import choreo.auto.AutoChooser;
+import choreo.auto.AutoFactory;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.CvSource;
@@ -25,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.RollerConstants;
@@ -61,6 +64,14 @@ public class RobotContainer {
   // The autonomous chooser
   // private final SendableChooser<Command> autoChooser = new SendableChooser<>();
   private final SendableChooser<Command> autoChooser;
+
+
+
+  //Choreo
+  private final AutoFactory autoFactory;
+  public final AutoChooser oreoChooser;
+  private final AutoRoutines autoRoutines;
+
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -109,6 +120,34 @@ public class RobotContainer {
     // autoChooser.addOption("Turn Left",autos.justLeave());
     // autoChooser.addOption("Cat5 123", autos.autos());
 
+
+    //Choreo
+    
+    oreoChooser = new AutoChooser();
+    RobotModeTriggers.autonomous().whileTrue(oreoChooser.selectedCommandScheduler());
+
+    autoFactory = new AutoFactory(
+        driveSubsystem::getPose,
+        driveSubsystem::resetPose,
+        driveSubsystem::followTrajectory,
+        true,
+        driveSubsystem);
+
+    autoRoutines = new AutoRoutines(autoFactory, driveSubsystem);
+    SmartDashboard.putData("Auto Choices", oreoChooser);
+
+    // oreoChooser.addCmd("OreoTest", () -> Commands.sequence(
+    // autoFactory.resetOdometry("Test"),
+    // autoFactory.trajectoryCmd("Test")));
+    oreoChooser.addCmd("Shpeal", autoRoutines::Shpeal);
+    oreoChooser.addCmd("Wailmer", autoRoutines::Wailmer);
+    oreoChooser.addCmd("Seel", autoRoutines::Seel);
+
+
+
+
+
+    
   }
 
   /**
