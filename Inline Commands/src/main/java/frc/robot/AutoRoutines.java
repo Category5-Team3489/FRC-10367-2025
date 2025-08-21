@@ -8,6 +8,7 @@ import frc.robot.subsystems.CANDriveSubsystem;
 
 public class AutoRoutines {
 
+    private final AutoFactory factory;
     private final CANDriveSubsystem drive;
 
     public AutoRoutines(AutoFactory factory, CANDriveSubsystem drive) {
