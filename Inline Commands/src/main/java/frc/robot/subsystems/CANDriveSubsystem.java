@@ -48,6 +48,8 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   private final AHRS navx;
 
+  
+
   private final DifferentialDriveOdometry m_Odometry;
   private DifferentialDriveKinematics differentialDriveKinematics;
   // private DifferentialDriveWheelPositions encoders;
@@ -222,6 +224,22 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   // Command to drive the robot with joystick inputs
   public Command tankDrive(
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       CANDriveSubsystem driveSubsystem, DoubleSupplier leftSpeed, DoubleSupplier rightSpeed) {
     return Commands.run(
         () -> {

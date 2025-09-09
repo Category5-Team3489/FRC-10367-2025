@@ -92,13 +92,13 @@ public class RobotContainer {
     // autoChooser = AutoBuilder.buildAutoChooserWithOptionsModifier((stream) ->
     // stream);
 
-    if (location.isPresent() && location.getAsInt() == 2) {
-    autoChooser.setDefaultOption("Autonomous",Autos.scoreLoneOnce(driveSubsystem,
-    2.234));
-    } else {
-    autoChooser.setDefaultOption("Autonomous",Autos.scoreLoneOnce(driveSubsystem,
-    3.651));
-    }
+    // if (location.isPresent() && location.getAsInt() == 2) {
+    // autoChooser.setDefaultOption("Autonomous",Autos.scoreLoneOnce(driveSubsystem,
+    // 2.234));
+    // } else {
+    // autoChooser.setDefaultOption("Autonomous",Autos.scoreLoneOnce(driveSubsystem,
+    // 3.651));
+    // }
 
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
