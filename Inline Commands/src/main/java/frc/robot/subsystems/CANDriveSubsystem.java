@@ -8,11 +8,14 @@ import java.beans.Encoder;
 import java.io.IOException;
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPLTVController;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkBase.ControlType;
 
 import choreo.trajectory.DifferentialSample;
 import edu.wpi.first.math.controller.LTVUnicycleController;
@@ -30,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
+
 
 import org.json.simple.parser.ParseException;
 
@@ -63,6 +67,8 @@ public class CANDriveSubsystem extends SubsystemBase {
     leftFollower = new WPI_TalonSRX(1);
     rightLeader = new WPI_TalonSRX(4);
     rightFollower = new WPI_TalonSRX(3);
+
+
     navx = new AHRS(SPI.Port.kMXP); // SPI connection for NavX
 
     // set up differential drive class
@@ -260,7 +266,33 @@ public class CANDriveSubsystem extends SubsystemBase {
 
     DifferentialDriveWheelSpeeds wheelSpeeds = differentialDriveKinematics.toWheelSpeeds(speeds);
 
-    drive.tankDrive(wheelSpeeds.leftMetersPerSecond,wheelSpeeds.rightMetersPerSecond);
+
+
+
+    double leftRadPerSec = wheelSpeeds.leftMetersPerSecond / DriveConstants.kWheelRadiusMeters;
+    double rightRadPerSec = wheelSpeeds.rightMetersPerSecond / DriveConstants.kWheelRadiusMeters;
+    // double leftRotPerMin = leftRadPerSec * (60 / 2 * Math.PI);
+    // double rightRotPerMin = rightRadPerSec * (60 / 2 * Math.PI);
+
+    // double kS = DriveConstants.kMotorKs;
+    // double kV = DriveConstants.kMotorKv;
+    
+    // double leftFFVolts = (kS * Math.signum(leftRadPerSec)) + (kV * leftRadPerSec);
+    // double rightFFVolts = (kS * Math.signum(rightRadPerSec)) + (kV * rightRadPerSec);
+
+
+
+    // leftController.setReference(leftRadPerSec, ControlType.kVelocity, ClosedLoopSlot.kSlot0, leftFFVolts);
+    // rightController.setReference(rightRadPerSec, ControlType.kVelocity, ClosedLoopSlot.kSlot0, rightFFVolts);
+
+
+
+    // TalonSRXControlMode.PercentOutput (DEFAULT)
+
+    leftLeader.set(TalonSRXControlMode.Velocity, leftRadPerSec);
+    rightLeader.set(TalonSRXControlMode.Velocity, rightRadPerSec);
+
+    // drive.tankDrive(wheelSpeeds.leftMetersPerSecond,wheelSpeeds.rightMetersPerSecond);
 
   }
 

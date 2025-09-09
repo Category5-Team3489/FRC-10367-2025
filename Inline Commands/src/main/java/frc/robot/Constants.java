@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+import edu.wpi.first.math.util.Units;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -26,6 +27,11 @@ public final class Constants {
     public static final int DRIVE_MOTOR_CURRENT_LIMIT = 60;
 
     public static final double kMaxSpeed = 5.2;
+    public static final double kWheelRadiusMeters = Units.inchesToMeters(3.0);
+
+    
+    public static final double kMotorKs = 0.176;
+    public static final double kMotorKv = 0.177;
 
   }
 
