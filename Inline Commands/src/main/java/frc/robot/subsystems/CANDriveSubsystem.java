@@ -15,7 +15,9 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPLTVController;
 import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import choreo.trajectory.DifferentialSample;
 import edu.wpi.first.math.controller.LTVUnicycleController;
@@ -34,42 +36,37 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 
-
 import org.json.simple.parser.ParseException;
 
 public class CANDriveSubsystem extends SubsystemBase {
-  private final WPI_TalonSRX leftLeader;
-  private final WPI_TalonSRX leftFollower;
-  private final WPI_TalonSRX rightLeader;
-  private final WPI_TalonSRX rightFollower;
+  private final SparkMax leftLeader;
+  private final SparkMax leftFollower;
+  private final SparkMax rightLeader;
+  private final SparkMax rightFollower;
 
   private final DifferentialDrive drive;
   private static final CANDriveSubsystem instance = new CANDriveSubsystem();
 
   private final AHRS navx;
 
-  
-
   private final DifferentialDriveOdometry m_Odometry;
   private DifferentialDriveKinematics differentialDriveKinematics;
   // private DifferentialDriveWheelPositions encoders;
 
-
-  
   // Choreo
   private final LTVUnicycleController controller = new LTVUnicycleController(0.02, DriveConstants.kMaxSpeed);
-  // private final DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(
-  //     DriveConstants.kTrackWidthMeters);
+  // private final DifferentialDriveKinematics kinematics = new
+  // DifferentialDriveKinematics(
+  // DriveConstants.kTrackWidthMeters);
   // private final double kS = DriveConstants.kMotorKs;
   // private final double kV = DriveConstants.kMotorKv;
 
   private CANDriveSubsystem() {
     // create brushed motors for drive
-    leftLeader = new WPI_TalonSRX(2);
-    leftFollower = new WPI_TalonSRX(1);
-    rightLeader = new WPI_TalonSRX(4);
-    rightFollower = new WPI_TalonSRX(3);
-
+    leftLeader = new SparkMax(DriveConstants.LEFT_LEADER_ID, MotorType.kBrushed);
+    leftFollower = new SparkMax(DriveConstants.LEFT_FOLLOWER_ID, MotorType.kBrushed);
+    rightLeader = new SparkMax(DriveConstants.RIGHT_LEADER_ID, MotorType.kBrushless);
+    rightFollower = new SparkMax(DriveConstants.RIGHT_FOLLOWER_ID, MotorType.kBrushless);
 
     navx = new AHRS(SPI.Port.kMXP); // SPI connection for NavX
 
@@ -80,8 +77,8 @@ public class CANDriveSubsystem extends SubsystemBase {
 
     // encoders = new DifferentialDriveWheelPositions(null, null);
 
-    m_Odometry = new DifferentialDriveOdometry(navx.getRotation2d(), leftLeader.getSelectedSensorPosition(),
-        rightLeader.getSelectedSensorPosition());
+    m_Odometry = new DifferentialDriveOdometry(navx.getRotation2d(), leftLeader.getEncoder().getPosition(),
+        rightLeader.getEncoder().getPosition());
     // Set can timeout. Because this project only sets parameters once on
     // construction, the timeout can be long without blocking robot operation. Code
     // which sets or gets parameters during operation may need a shorter timeout.
@@ -104,6 +101,7 @@ public class CANDriveSubsystem extends SubsystemBase {
     // in and persisting in case of a controller reset due to breaker trip
     rightFollower.follow(rightLeader);
     leftFollower.follow(leftLeader);
+    //TODO remove follow and add to CANSpark Motor Contorller in Rev Hardware Client 
 
     // Remove following, then apply config to right leader
     rightLeader.setInverted(true);
@@ -128,17 +126,14 @@ public class CANDriveSubsystem extends SubsystemBase {
     RobotConfig config;
     try {
       config = RobotConfig.fromGUISettings();
-    } 
-    catch (ParseException pe) {
+    } catch (ParseException pe) {
 
       pe.printStackTrace();
       return;
-    }
-    catch(IOException ioe) {
+    } catch (IOException ioe) {
       ioe.printStackTrace();
       return;
     }
-
 
     // // Configure AutoBuilder last
     AutoBuilder.configure(
@@ -207,7 +202,7 @@ public class CANDriveSubsystem extends SubsystemBase {
     final double rightMotorSpeed = chassisSpeeds.vxMetersPerSecond
         + chassisSpeeds.omegaRadiansPerSecond * robotLength / 2;
 
-    drive.tankDrive(leftMotorSpeed, rightMotorSpeed);
+    // drive.tankDrive(leftMotorSpeed, rightMotorSpeed);
   }
   // endregion
 
@@ -225,32 +220,17 @@ public class CANDriveSubsystem extends SubsystemBase {
   // Command to drive the robot with joystick inputs
   public Command tankDrive(
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       CANDriveSubsystem driveSubsystem, DoubleSupplier leftSpeed, DoubleSupplier rightSpeed) {
     return Commands.run(
         () -> {
           // System.out.println("Tank Drive Auto");
-          drive.tankDrive(leftSpeed.getAsDouble(), rightSpeed.getAsDouble());
+          // drive.tankDrive(leftSpeed.getAsDouble(), rightSpeed.getAsDouble());
         }, driveSubsystem);
 
   }
 
   public void move(Double leftSpeed, Double rightSpeed) {
-    drive.tankDrive(leftSpeed, rightSpeed);
+    // drive.tankDrive(leftSpeed, rightSpeed);
   }
 
   public double getYaw() {
@@ -267,9 +247,7 @@ public class CANDriveSubsystem extends SubsystemBase {
   // System.out.println(leftFollower.getSelectedSensorPosition());
   // });
 
-
-
-  //Choreo
+  // Choreo
   public void followTrajectory(DifferentialSample sample) {
 
     Pose2d pose = getPose();
@@ -284,9 +262,6 @@ public class CANDriveSubsystem extends SubsystemBase {
 
     DifferentialDriveWheelSpeeds wheelSpeeds = differentialDriveKinematics.toWheelSpeeds(speeds);
 
-
-
-
     double leftRadPerSec = wheelSpeeds.leftMetersPerSecond / DriveConstants.kWheelRadiusMeters;
     double rightRadPerSec = wheelSpeeds.rightMetersPerSecond / DriveConstants.kWheelRadiusMeters;
     // double leftRotPerMin = leftRadPerSec * (60 / 2 * Math.PI);
@@ -294,21 +269,21 @@ public class CANDriveSubsystem extends SubsystemBase {
 
     // double kS = DriveConstants.kMotorKs;
     // double kV = DriveConstants.kMotorKv;
-    
-    // double leftFFVolts = (kS * Math.signum(leftRadPerSec)) + (kV * leftRadPerSec);
-    // double rightFFVolts = (kS * Math.signum(rightRadPerSec)) + (kV * rightRadPerSec);
 
+    // double leftFFVolts = (kS * Math.signum(leftRadPerSec)) + (kV *
+    // leftRadPerSec);
+    // double rightFFVolts = (kS * Math.signum(rightRadPerSec)) + (kV *
+    // rightRadPerSec);
 
-
-    // leftController.setReference(leftRadPerSec, ControlType.kVelocity, ClosedLoopSlot.kSlot0, leftFFVolts);
-    // rightController.setReference(rightRadPerSec, ControlType.kVelocity, ClosedLoopSlot.kSlot0, rightFFVolts);
-
-
+    // leftController.setReference(leftRadPerSec, ControlType.kVelocity,
+    // ClosedLoopSlot.kSlot0, leftFFVolts);
+    // rightController.setReference(rightRadPerSec, ControlType.kVelocity,
+    // ClosedLoopSlot.kSlot0, rightFFVolts);
 
     // TalonSRXControlMode.PercentOutput (DEFAULT)
 
-    leftLeader.set(TalonSRXControlMode.Velocity, leftRadPerSec);
-    rightLeader.set(TalonSRXControlMode.Velocity, rightRadPerSec);
+    // leftLeader.set(TalonSRXControlMode.Velocity, leftRadPerSec);
+    // rightLeader.set(TalonSRXControlMode.Velocity, rightRadPerSec);
 
     // drive.tankDrive(wheelSpeeds.leftMetersPerSecond,wheelSpeeds.rightMetersPerSecond);
 
