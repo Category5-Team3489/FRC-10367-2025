@@ -30,7 +30,7 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
     private AlgaeIntakeSubsystem() {
         // TODO find actual motor IDs
         algeaIntakeRoller = new SparkMax(11, MotorType.kBrushless);
-        algeaIntakeActuator = new SparkMax(4, MotorType.kBrushless);
+        algeaIntakeActuator = new SparkMax(5, MotorType.kBrushless);
         algeaIntakeActuator.getEncoder().setPosition(0);
 
         pidController = algeaIntakeActuator.getClosedLoopController();

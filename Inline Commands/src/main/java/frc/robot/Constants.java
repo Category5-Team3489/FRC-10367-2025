@@ -29,7 +29,6 @@ public final class Constants {
     public static final double kMaxSpeed = 5.2;
     public static final double kWheelRadiusMeters = Units.inchesToMeters(3.0);
 
-    
     public static final double kMotorKs = 0.176;
     public static final double kMotorKv = 0.177;
 
