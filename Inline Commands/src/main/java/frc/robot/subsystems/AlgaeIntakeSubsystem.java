@@ -55,8 +55,7 @@ public class AlgaeIntakeSubsystem extends SubsystemBase {
 public void periodic() {
     
     // System.out.println(targetTics);
-    System.out.println(algeaIntakeActuator.getEncoder().getPosition());
-    System.out.println(targetTics);
+
 
 }
 

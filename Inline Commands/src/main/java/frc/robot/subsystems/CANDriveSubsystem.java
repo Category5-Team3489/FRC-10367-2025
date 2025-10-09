@@ -21,7 +21,9 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import choreo.trajectory.DifferentialSample;
 import edu.wpi.first.math.controller.LTVUnicycleController;
@@ -51,7 +53,7 @@ public class CANDriveSubsystem extends SubsystemBase {
   private final SparkClosedLoopController leftPidController;
   private final SparkClosedLoopController rightPidController;
 
-  // private final DifferentialDrive drive;
+  private final DifferentialDrive drive;
   private static final CANDriveSubsystem instance = new CANDriveSubsystem();
 
   private final AHRS navx;
@@ -70,25 +72,23 @@ public class CANDriveSubsystem extends SubsystemBase {
 
   private CANDriveSubsystem() {
     // create brushed motors for drive
-    leftLeader = new SparkMax(DriveConstants.LEFT_LEADER_ID, MotorType.kBrushed);
-    leftFollower = new SparkMax(DriveConstants.LEFT_FOLLOWER_ID, MotorType.kBrushed);
-    rightLeader = new SparkMax(DriveConstants.RIGHT_LEADER_ID, MotorType.kBrushed);
-    rightFollower = new SparkMax(DriveConstants.RIGHT_FOLLOWER_ID, MotorType.kBrushed);
-  
+    leftLeader = new SparkMax(2, MotorType.kBrushed);
+    leftFollower = new SparkMax(1, MotorType.kBrushed);
+    rightLeader = new SparkMax(3, MotorType.kBrushed);
+    rightFollower = new SparkMax(4, MotorType.kBrushed);
+
     leftPidController = leftLeader.getClosedLoopController();
     rightPidController = rightLeader.getClosedLoopController();
 
     navx = new AHRS(SPI.Port.kMXP); // SPI connection for NavX
 
     // set up differential drive class
-    // drive = new DifferentialDrive(leftLeader, rightLeader);
+    drive = new DifferentialDrive(leftLeader, rightLeader);
 
     differentialDriveKinematics = new DifferentialDriveKinematics(0.251);
 
     // encoders = new DifferentialDriveWheelPositions(null, null);
 
-    m_Odometry = new DifferentialDriveOdometry(navx.getRotation2d(), leftLeader.getEncoder().getPosition(),
-        rightLeader.getEncoder().getPosition());
     // Set can timeout. Because this project only sets parameters once on
     // construction, the timeout can be long without blocking robot operation. Code
     // which sets or gets parameters during operation may need a shorter timeout.
@@ -103,31 +103,66 @@ public class CANDriveSubsystem extends SubsystemBase {
     // battery). The current limit helps prevent tripping
     // breakers.
     SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
+    SparkMaxConfig leftLeaderSparkMaxConfig = new SparkMaxConfig();
+    SparkMaxConfig leftFollowerSparkMaxConfig = new SparkMaxConfig();
+    SparkMaxConfig rightLeaderSparkMaxConfig = new SparkMaxConfig();
+    SparkMaxConfig rightFollowerSparkMaxConfig = new SparkMaxConfig();
     // config.voltageCompensation(12);
     // config.smartCurrentLimit(DriveConstants.DRIVE_MOTOR_CURRENT_LIMIT);
 
     // Set configuration to follow leader and then apply it to corresponding
     // follower. Resetting in case a new controller is swapped
     // in and persisting in case of a controller reset due to breaker trip
-  //   rightFollower.follow(rightLeader);
-  //  leftFollower.follow(leftLeader);
-   sparkMaxConfig.follow(leftLeader).inverted(false);
-    leftFollower.configure(sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    sparkMaxConfig.follow(rightLeader).inverted(true);
-    rightFollower.configure(sparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    // rightFollower.follow(rightLeader);
+    // leftFollower.follow(leftLeader);
 
+    sparkMaxConfig.openLoopRampRate(DriveConstants.kRampRateSeconds)
+    .closedLoopRampRate(DriveConstants.kRampRateSeconds)
+    .idleMode(IdleMode.kBrake)
+    .voltageCompensation(12.0)
+    .smartCurrentLimit(DriveConstants.kCurrentLimit);
 
-        // Remove following, then apply config to right leader
+    sparkMaxConfig.encoder
+    .positionConversionFactor((2 * Math.PI) / DriveConstants.kMotorReduction)
+    .velocityConversionFactor(((2 * Math.PI) / 60.0) / DriveConstants.kMotorReduction)
+    .uvwMeasurementPeriod(20)
+    .uvwAverageDepth(2);
+
+    leftLeaderSparkMaxConfig.apply(sparkMaxConfig);
+    leftFollowerSparkMaxConfig.apply(sparkMaxConfig);
+    rightLeaderSparkMaxConfig.apply(sparkMaxConfig);
+    rightFollowerSparkMaxConfig.apply(sparkMaxConfig);
+
+    leftLeaderSparkMaxConfig.inverted(true);
+    leftLeader.configure(leftLeaderSparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    leftLeader.getEncoder().setPosition(0);
+    
+    rightLeaderSparkMaxConfig.inverted(false);
+    rightLeader.configure(rightLeaderSparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    rightLeader.getEncoder().setPosition(0);
+    
+    // leftFollowerSparkMaxConfig.follow(leftLeader).inverted(true);
+    leftFollowerSparkMaxConfig.inverted(true);
+    leftFollower.configure(leftFollowerSparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    
+    // rightFollowerSparkMaxConfig.follow(rightLeader).inverted(false);
+    rightFollowerSparkMaxConfig.inverted(false);
+    rightFollower.configure(rightFollowerSparkMaxConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    
+
+    // Remove following, then apply config to right leader
     // rightLeader.setInverted(true);
     // leftLeader.setInverted(false);
     // rightFollower.setInverted(true);
-
+    m_Odometry = new DifferentialDriveOdometry(navx.getRotation2d(), leftLeader.getEncoder().getPosition(),
+    rightLeader.getEncoder().getPosition());
     // Set conifg to inverted and then apply to left leader. Set Left side inverted
     // so that postive values drive both sides forward
 
     // All other subsystem initialization
     // ...
-      
+
     // Load the RobotConfig from the GUI settings. You should probably
     // store this in your Constants file
 
@@ -216,7 +251,7 @@ public class CANDriveSubsystem extends SubsystemBase {
     final double rightMotorSpeed = chassisSpeeds.vxMetersPerSecond
         + chassisSpeeds.omegaRadiansPerSecond * robotLength / 2;
 
-    // drive.tankDrive(leftMotorSpeed, rightMotorSpeed);
+    drive.tankDrive(leftMotorSpeed, rightMotorSpeed);
   }
   // endregion
 
@@ -232,15 +267,11 @@ public class CANDriveSubsystem extends SubsystemBase {
   }
 
   // Command to drive the robot with joystick inputs
-  public Command tankDrive(
-
-      CANDriveSubsystem driveSubsystem, DoubleSupplier leftSpeed, DoubleSupplier rightSpeed) {
+  public Command tankDrive(CANDriveSubsystem driveSubsystem, DoubleSupplier leftSpeed, DoubleSupplier rightSpeed) {
     return Commands.run(
         () -> {
-          // System.out.println("Tank Drive Auto");
-          // drive.tankDrive(leftSpeed.getAsDouble(), rightSpeed.getAsDouble());
+          drive.tankDrive(leftSpeed.getAsDouble(), rightSpeed.getAsDouble());
         }, driveSubsystem);
-
   }
 
   public void move(Double leftSpeed, Double rightSpeed) {
@@ -276,8 +307,10 @@ public class CANDriveSubsystem extends SubsystemBase {
 
     DifferentialDriveWheelSpeeds wheelSpeeds = differentialDriveKinematics.toWheelSpeeds(speeds);
 
-    // double leftRadPerSec = wheelSpeeds.leftMetersPerSecond / DriveConstants.kWheelRadiusMeters;
-    // double rightRadPerSec = wheelSpeeds.rightMetersPerSecond / DriveConstants.kWheelRadiusMeters;
+    // double leftRadPerSec = wheelSpeeds.leftMetersPerSecond /
+    // DriveConstants.kWheelRadiusMeters;
+    // double rightRadPerSec = wheelSpeeds.rightMetersPerSecond /
+    // DriveConstants.kWheelRadiusMeters;
     runClosedLoop(wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
     // double leftRotPerMin = leftRadPerSec * (60 / 2 * Math.PI);
     // double rightRotPerMin = rightRadPerSec * (60 / 2 * Math.PI);
@@ -289,8 +322,6 @@ public class CANDriveSubsystem extends SubsystemBase {
     // leftRadPerSec);
     // double rightFFVolts = (kS * Math.signum(rightRadPerSec)) + (kV *
     // rightRadPerSec);
-
- 
 
     // TalonSRXControlMode.PercentOutput (DEFAULT
     // leftLeader.set(TalonSRXControlMode.Velocity, leftRadPerSec);
@@ -306,14 +337,17 @@ public class CANDriveSubsystem extends SubsystemBase {
     double rightRadPerSec = rightMetersPerSec / DriveConstants.kWheelRadiusMeters;
     // double rightRotPerMin = rightRadPerSec * (60 / 2 * Math.PI);
 
-    double leftFFVolts = (DriveConstants.kMotorKs * Math.signum(leftRadPerSec)) + (DriveConstants.kMotorKv * leftRadPerSec);
-    double rightFFVolts = (DriveConstants.kMotorKs * Math.signum(rightRadPerSec)) + (DriveConstants.kMotorKv * rightRadPerSec);
+    double leftFFVolts = (DriveConstants.kMotorKs * Math.signum(leftRadPerSec))
+        + (DriveConstants.kMotorKv * leftRadPerSec);
+    double rightFFVolts = (DriveConstants.kMotorKs * Math.signum(rightRadPerSec))
+        + (DriveConstants.kMotorKv * rightRadPerSec);
 
     leftPidController.setReference(leftRadPerSec, ControlType.kVelocity,
-    ClosedLoopSlot.kSlot0, leftFFVolts);
+        ClosedLoopSlot.kSlot0, leftFFVolts);
     rightPidController.setReference(rightRadPerSec, ControlType.kVelocity,
-    ClosedLoopSlot.kSlot0, rightFFVolts);
+        ClosedLoopSlot.kSlot0, rightFFVolts);
 
-    // driveIO.setVelocity(leftRadPerSec, rightRadPerSec, leftFFVolts, rightFFVolts);
-}
+    // driveIO.setVelocity(leftRadPerSec, rightRadPerSec, leftFFVolts,
+    // rightFFVolts);
+  }
 }

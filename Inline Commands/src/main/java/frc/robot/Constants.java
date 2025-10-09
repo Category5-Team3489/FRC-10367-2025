@@ -19,10 +19,10 @@ import edu.wpi.first.math.util.Units;
  */
 public final class Constants {
   public static final class DriveConstants {
-    public static final int LEFT_LEADER_ID = 1;
-    public static final int LEFT_FOLLOWER_ID = 2;
-    public static final int RIGHT_LEADER_ID = 3;
-    public static final int RIGHT_FOLLOWER_ID = 4;
+    public static final int LEFT_LEADER_ID_1 = 1;
+    public static final int LEFT_FOLLOWER_ID_2 = 2;
+    public static final int RIGHT_LEADER_ID_3 = 3;
+    public static final int RIGHT_FOLLOWER_ID_4 = 4;
 
     public static final int DRIVE_MOTOR_CURRENT_LIMIT = 60;
 
@@ -31,6 +31,9 @@ public final class Constants {
 
     public static final double kMotorKs = 0.176;
     public static final double kMotorKv = 0.177;
+    public static final double kMotorReduction = 8.45;
+    public static final double kRampRateSeconds = 1.0;
+    public static final int kCurrentLimit = 60;
 
   }
 
